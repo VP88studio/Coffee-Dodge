@@ -11,6 +11,9 @@ clock = pygame.time.Clock()
 #Backround
 backroundold = pygame.image.load('Assets/backround.png')
 backround = pygame.transform.scale(backroundold, (1254, 1254))
+#Pillar
+pillarold = pygame.image.load('Assets/pillar.png')
+pillar = pygame.transform.scale(pillarold, (320, 480))
 #Game Vars and Functions
 #gets width of the backround image 
 backround_width = backround.get_width()
@@ -39,5 +42,6 @@ while running:
     #this displays the second image by making the x position backroundx + the width of the first backround
     #idk how i didnt think of this in the 3 days i spent on this problem
     display.blit(backround, (backroundx + backround_width, 0))
+    display.blit(pillar, (0, 100))
     pygame.display.update()
     clock.tick(60)
