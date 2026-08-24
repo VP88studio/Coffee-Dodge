@@ -8,27 +8,36 @@ SCREEN_HEIGHT = 1000
 display = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 color = 255, 0, 0
 clock = pygame.time.Clock()
-#Game Vars
-backroundx = 0
-backroundy = 0
-tempbackroundx = -300
-tempbackroundy = 0
-tempbackround = False
 #Backround
 backroundold = pygame.image.load('Assets/backround.png')
-backround = pygame.transform.scale(backroundold, (1000, 1000))
+backround = pygame.transform.scale(backroundold, (1254, 1254))
+#Game Vars and Functions
+#gets width of the backround image 
+backround_width = backround.get_width()
+#sets the backround x position
+backroundx = 0
+#sets the speed that it scrolls can be used to make harder gamemodes
+scrollspeed = 2
+
+
 #Run Loop
 running = True
 while running:
-    if backroundx == -1000:
+    #check if events happening
+    for event in pygame.event.get():
+        #checking if player quit
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+    #makes backroundx = to backroundx - scrollspeed so every time it loops it it is equal to itself - scroll speed to make it move
+    backroundx -= scrollspeed   
+    #this means that if backround_width is more than or equal to backroundx it sets backroundx to 0
+    if backroundx <= -backround_width:
         backroundx = 0
-        tempbackround = False
-    if backroundx <= -300:
-        tempbackround = True
-        print('test')
-    if tempbackround == False:
-        pygame.Surface.blit(display, backround, (backroundx, backroundy))
-        pygame.display.flip()
-        backroundx = backroundx - 1
-        time.sleep(0.01)
-    
+    #this displays the backround images
+    display.blit(backround, (backroundx, 0))
+    #this displays the second image by making the x position backroundx + the width of the first backround
+    #idk how i didnt think of this in the 3 days i spent on this problem
+    display.blit(backround, (backroundx + backround_width, 0))
+    pygame.display.update()
+    clock.tick(60)
