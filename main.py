@@ -99,13 +99,16 @@ while running:
     pillarxlistmaker()
     pillar1x -= scrollspeed
     pillar2x -= scrollspeed
+    pillar3x -= scrollspeed
     if pillar1x == -260:
         pillar1x = 600
         first_pillary = random.randint(-280, -70)
     if pillar2x == -260:
         pillar2x = 600
         second_pillary = random.randint(-280, -70)
-    third_pillary = random.randint(-280, 70)
+    if pillar3x == -260:
+        pillar3x = 600
+        third_pillary = random.randint(-280, 70)
     
     #makes backroundx = to backroundx - scrollspeed so every time it loops it it is equal to itself - scroll speed to make it move
     backroundx -= scrollspeed   
@@ -122,6 +125,6 @@ while running:
     pillarload.pillar1
     pillarload.pillar2
     pillarload.pillar3
-    print(pillarload.xposlist, pillarx[0], pillarx[1])
+    print(pillarload.xposlist, pillarx[0], pillarx[1], pillarx[2])
     pygame.display.update()
     clock.tick(60)
