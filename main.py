@@ -26,6 +26,13 @@ birdimg = pygame.transform.scale(birdold, (120, 80))
 #Game Vars and Functions
 keys = pygame.key.get_pressed()
 birdy = 460
+pillarx = []
+pillar1x = 600
+pillar2x = 900
+def pillarxlistmaker():
+    pillarx.append(pillar1x)
+    pillarx.append(pillar2x)
+pillarxlistmaker()
 def pillaryfinder():
     global first_pillary, second_pillary, third_pillary
     #every 209.8
@@ -35,16 +42,18 @@ def pillaryfinder():
 pillaryfinder()
 class pillarobj:
     def __init__(self):
-        self.xpos = backroundx + 808
-        if backroundx + 808 == -240:
-            self.xpos = backroundx - 200
-        if backroundx == 0:
-            pillaryfinder()
-        self.pillary = first_pillary
+        self.pillarylist = []
+        self.xposlist = []
+        self.xposlist.append(pillarx[0])
+        self.xposlist.append(pillarx[1])
+        self.pillarylist.append(first_pillary)
+        self.pillarylist.append(second_pillary)
         self.img  = pillar
         self.imgflip = pillarflip
-        self.pillar1 = display.blit(self.img, (self.xpos, self.pillary))
-        self.pillar1flip = display.blit(self.imgflip, (self.xpos, self.pillary + 850))
+        self.pillar1 = display.blit(self.img, (self.xposlist[0], self.pillarylist[0]))
+        self.pillar1flip = display.blit(self.imgflip, (self.xposlist[0], self.pillarylist[0] + 850))
+        self.pillar2 = display.blit(self.img, (self.xposlist[1], self.pillarylist[1]))
+        self.pillar2flip = display.blit(self.imgflip, (self.xposlist[1], self.pillarylist[1] + 850))
 #gets width of the backround image 
 backround_width = backround.get_width()
 #sets the backround x position
@@ -80,6 +89,11 @@ while running:
         bird_hightspeed = 0
     bird_hightspeed += (0.125)
     birdy += bird_hightspeed
+    #pillar move loop
+    pillar1x -= scrollspeed
+    pillar2x -= scrollspeed
+    print(pillar1x, pillar2x)
+    
     #makes backroundx = to backroundx - scrollspeed so every time it loops it it is equal to itself - scroll speed to make it move
     backroundx -= scrollspeed   
     #this means that if backround_width is more than or equal to backroundx it sets backroundx to 0
@@ -93,5 +107,6 @@ while running:
     display.blit(birdimg, (290, birdy))
     pillarimgthingy = pillarobj()
     pillarimgthingy.pillar1
+    pillarimgthingy.pillar2
     pygame.display.update()
     clock.tick(60)
