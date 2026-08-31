@@ -1,4 +1,4 @@
-import time, sys, pygame, math, random, asyncio
+import time, sys, pygame, math, random, json
 pygame.init()
 pygame.font.init()
 
@@ -6,6 +6,7 @@ pygame.font.init()
 testpillar = False
 testpress = True
 testscore = True
+tesths = True
 #DISPLAY
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 1000
@@ -23,6 +24,28 @@ backroundflip = pygame.transform.rotate(backround, 180)
 homeold = pygame.image.load('Assets/home.png')
 homeimg = pygame.transform.scale(homeold, (750, 1000))
 BLUE = 0,0,255
+#Json Save File
+defult_data = {
+    'highscore': 0,
+    'mode': 'Normal'
+}
+def save(datasave):
+    with open('Saves/saves.json', 'w') as file:
+        json.dump(datasave, file, indent=4)
+        if tesths:
+            print('Save Successful')
+try:
+    with open('Saves/saves.json', 'r') as file:
+        game_data = json.load(file)
+        if tesths:
+            print(game_data)
+            print('Save Found')
+            print(f"FoundData {game_data}")
+except FileNotFoundError:
+    game_data = defult_data
+    if tesths:
+        print('Save Not Found')
+        print(f"NotFoundData {game_data}")
 startbutton = {
     'x': 180,
     'y': 350,
@@ -77,16 +100,10 @@ birdimg = pygame.transform.scale(birdold, (120, 80))
 #birdheight 1024
 #3:2 ratio
 #Game Vars and Functions
+gamecolor = 230, 115, 0
 highscore = {
-    "highscore": '0'
+    "highscore": ''
 }
-with open('Saves/saves.txt', "r") as file:
-    if file.read() == '':
-        with open('Saves/saves.txt', "w") as file:
-            file.write('0')
-            print('No Save Data')
-    else:
-        highscore['highscore'] = str(file.read())
 WHITE = 255,255,255
 score = 0
 resetgame = False
@@ -131,33 +148,57 @@ class pillarobj:
         self.pillar3 = display.blit(self.img, (self.xposlist[2], self.pillarylist[2]))
         self.pillar3flip = display.blit(self.imgflip, (self.xposlist[2], self.pillarylist[2] + 850))
         
+highscore['highscore'] = str(game_data['highscore'])
+    
 #gets width     of the backround image 
 backround_width = backround.get_width()
 #sets the backround x position
 backroundx = 0
 #sets the speed that it scrolls can be used to make harder gamemodes
 scrollspeed = 2
+if game_data['mode'] == 'easy':
+    scrollspeed = 1
+if game_data['mode'] == 'normal':
+    scrollspeed = 2
+if game_data['mode'] == 'hard':
+    scrollspeed = 4
 pillary = -280
 bird_hightspeed = 0
+save(defult_data)
+print(highscore['highscore'])
 #-70
 #-280
 #Run Loop
 running = True
 while running:
+    highscorex = 110
     if scrollspeed == 1:
         mode = 'Mode: Easy'
+        modevar = 'easy'
         modex = 155
     if scrollspeed == 2:
         mode = 'Mode: Normal'
+        modevar = 'normal'
         modex = 100
     if scrollspeed == 4:
         mode = "Mode: Hard"
+        modevar = 'hard'
         modex = 145
     mousepos = pygame.mouse.get_pos()
     if gamestatus == 1:
+        if highscore['highscore'] == '':
+            highscore['highscore'] = '0'
         #home backround DONT MOVE UNLESS U WANNA SPEND 3 HOURS DYING ON THE INSIDE
         display.blit(homeimg, (-25,0))
-        mode_surface = mode_font.render(mode, True, (230, 115, 0))
+        mode_surface = mode_font.render(mode, True, gamecolor)
+        hs_surface = mode_font.render(f'Highscore: {highscore['highscore']}', True, gamecolor)
+        if int(highscore['highscore']) <= 10:
+            highscorex = 110
+        if int(highscore['highscore']) == 10 or int(highscore['highscore']) >= 10 and int(highscore['highscore']) <= 100:
+            highscorex = 90
+        if int(highscore['highscore']) == 100 or int(highscore['highscore']) >= 100 and int(highscore['highscore']) <= 1000:
+            highscorex = 75
+        display.blit(hs_surface, (highscorex, 820))
         display.blit(mode_surface, (modex, 10))
         start_rect = pygame.Rect((startbutton['x'], startbutton['y']), (startbutton['width'], startbutton['height']))
         easy_rect = pygame.Rect((easybutton['x'], easybutton['y']), (easybutton['width'], easybutton['height']))
@@ -165,8 +206,12 @@ while running:
         hard_rect = pygame.Rect((hardbutton['x'], hardbutton['y']), (hardbutton['width'], hardbutton['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                with open('Saves/saves.txt', "w") as file:
-                    file.write(str(highscore['highscore']))
+                defult_data['highscore'] = int(highscore['highscore'])
+                defult_data['mode'] = modevar
+                if tesths:
+                    print(f'HS: {int(highscore['highscore'])}')
+                    print(f"Big Boy HS: {defult_data['highscore']}")
+                save(defult_data)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -188,8 +233,12 @@ while running:
         home_rect = pygame.Rect((homebutton['x'], homebutton['y']), (homebutton['width'], homebutton['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                with open('Saves/saves.txt', "w") as file:
-                    file.write(str(highscore['highscore'])) 
+                defult_data['highscore'] = int(highscore['highscore'])
+                defult_data['mode'] = modevar
+                if tesths:
+                    print(f'HS: {int(highscore['highscore'])}')
+                    print(f"Big Boy HS: {defult_data['highscore']}")
+                save(defult_data)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -222,8 +271,12 @@ while running:
                         gamestatus = 2
             #checking if player quit
             if event.type == pygame.QUIT:
-                with open('Saves/saves.txt', "w") as file:
-                    file.write(highscore['highscore'])
+                defult_data['highscore'] = int(highscore['highscore'])
+                defult_data['mode'] = modevar
+                if tesths:
+                    print(f'HS: {int(highscore['highscore'])}')
+                    print(f"Big Boy HS: {defult_data['highscore']}")
+                save(defult_data)
                 pygame.quit()
                 sys.exit() 
             if event.type == pygame.KEYDOWN:
