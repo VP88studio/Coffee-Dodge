@@ -23,11 +23,14 @@ backroundflip = pygame.transform.rotate(backround, 180)
 #Home Screen
 homeold = pygame.image.load('Assets/home.png')
 homeimg = pygame.transform.scale(homeold, (750, 1000))
+shopold = pygame.image.load('Assets/shop.png')
+shopimg = pygame.transform.scale(shopold, (750, 1000))
 BLUE = 0,0,255
 #Json Save File
 defult_data = {
     'highscore': 0,
-    'mode': 'Normal'
+    'mode': 'Normal',
+    'coffeebeans': 0
 }
 def save(datasave):
     with open('Saves/saves.json', 'w') as file:
@@ -46,6 +49,17 @@ except FileNotFoundError:
     if tesths:
         print('Save Not Found')
         print(f"NotFoundData {game_data}")
+def movesave():
+    defult_data['highscore'] = int(highscore['highscore'])
+    defult_data['mode'] = modevar
+    defult_data['coffeebeans'] = game_data['coffeebeans']
+    if tesths:
+        print(f'HS: {int(highscore['highscore'])}')
+        print(f"Big Boy HS: {defult_data['highscore']}")
+        print(f'coffeebeans: {defult_data['coffeebeans']}')
+    save(defult_data)
+    pygame.quit()
+    sys.exit()
 startbutton = {
     'x': 180,
     'y': 350,
@@ -69,6 +83,12 @@ hardbutton = {
     'y': 620,
     'width': 300,
     'height': 60
+}
+shopbutton = {
+    'x': 180,
+    'y': 700,
+    'width': 340,
+    'height': 90
 }
 #GameOverScreen
 gameoverold = pygame.image.load('Assets/gameover.png')
@@ -185,6 +205,11 @@ while running:
         modevar = 'hard'
         modex = 145
     mousepos = pygame.mouse.get_pos()
+    if gamestatus == 0:
+        display.blit(shopimg, (-25, -20))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                movesave()
     if gamestatus == 1:
         if highscore['highscore'] == '':
             highscore['highscore'] = '0'
@@ -200,23 +225,19 @@ while running:
             highscorex = 75
         display.blit(hs_surface, (highscorex, 820))
         display.blit(mode_surface, (modex, 10))
+        shop_rect = pygame.Rect((shopbutton['x'], shopbutton['y']), (shopbutton['width'], shopbutton['height']))
         start_rect = pygame.Rect((startbutton['x'], startbutton['y']), (startbutton['width'], startbutton['height']))
         easy_rect = pygame.Rect((easybutton['x'], easybutton['y']), (easybutton['width'], easybutton['height']))
         normal_rect = pygame.Rect((normalbutton['x'], normalbutton['y']), (normalbutton['width'], normalbutton['height']))
         hard_rect = pygame.Rect((hardbutton['x'], hardbutton['y']), (hardbutton['width'], hardbutton['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                defult_data['highscore'] = int(highscore['highscore'])
-                defult_data['mode'] = modevar
-                if tesths:
-                    print(f'HS: {int(highscore['highscore'])}')
-                    print(f"Big Boy HS: {defult_data['highscore']}")
-                save(defult_data)
-                pygame.quit()
-                sys.exit()
+                movesave()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_rect.collidepoint(mousepos):
                     gamestatus = 3
+                if shop_rect.collidepoint(mousepos):
+                    gamestatus = 0
                 if easy_rect.collidepoint(mousepos):
                     scrollspeed = 1
                 if normal_rect.collidepoint(mousepos):
@@ -233,14 +254,7 @@ while running:
         home_rect = pygame.Rect((homebutton['x'], homebutton['y']), (homebutton['width'], homebutton['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                defult_data['highscore'] = int(highscore['highscore'])
-                defult_data['mode'] = modevar
-                if tesths:
-                    print(f'HS: {int(highscore['highscore'])}')
-                    print(f"Big Boy HS: {defult_data['highscore']}")
-                save(defult_data)
-                pygame.quit()
-                sys.exit()
+                movesave()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if restart_rect.collidepoint(mousepos):
                     resetgame = True
@@ -269,16 +283,12 @@ while running:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
                         gamestatus = 2
+                    if event.key == pygame.K_s:
+                        print('AdminScore')
+                        score = score + 1
             #checking if player quit
             if event.type == pygame.QUIT:
-                defult_data['highscore'] = int(highscore['highscore'])
-                defult_data['mode'] = modevar
-                if tesths:
-                    print(f'HS: {int(highscore['highscore'])}')
-                    print(f"Big Boy HS: {defult_data['highscore']}")
-                save(defult_data)
-                pygame.quit()
-                sys.exit() 
+                movesave()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     bird_hightspeed = -5
@@ -341,10 +351,12 @@ while running:
                 print(score)
         #player die actions
         if bird_mask.overlap(pillar_mask, pillar1_offset) or bird_mask.overlap(pillar_mask, pillar2_offset) or bird_mask.overlap(pillar_mask, pillar3_offset):
+            game_data['coffeebeans'] = int(game_data['coffeebeans']) + score
             if testpillar:
                 print("top pillar touched")
             gamestatus = 2
         if bird_mask.overlap(pillarflip_mask, pillarflip1_offset) or bird_mask.overlap(pillarflip_mask, pillarflip2_offset) or bird_mask.overlap(pillarflip_mask, pillarflip3_offset):
+            game_data['coffeebeans'] = int(game_data['coffeebeans']) + score
             if testpillar:
                 print("bottom pillar touched")
             gamestatus = 2

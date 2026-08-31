@@ -1,4 +1,5 @@
 {
-    "highscore": "hard",
-    "mode": "Normal"
+    "highscore": 0,
+    "mode": "normal",
+    "coffeebeans": 0
 }
