@@ -4,9 +4,9 @@ pygame.font.init()
 
 #test
 testpillar = False
-testpress = True
-testscore = True
-tesths = True
+testpress = False
+testscore = False
+tesths = False
 #DISPLAY
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 1000
@@ -17,14 +17,23 @@ clock = pygame.time.Clock()
 font = pygame.font.Font('Assets/font.ttf', 120)
 mode_font = pygame.font.Font('Assets/font.ttf', 70)
 #Backround
-backroundold = pygame.image.load('Assets/backround.png')
+backrounddetails = 'Assets/backround.png'
+birddetails = 'Assets/bird.png'
+pillardetails = 'Assets/pillar.png'
+backroundold = pygame.image.load(backrounddetails)
 backround = pygame.transform.scale(backroundold, (1049, 1499))
 backroundflip = pygame.transform.rotate(backround, 180)
 #Home Screen
 homeold = pygame.image.load('Assets/home.png')
 homeimg = pygame.transform.scale(homeold, (750, 1000))
+#Shop
 shopold = pygame.image.load('Assets/shop.png')
 shopimg = pygame.transform.scale(shopold, (750, 1000))
+equippedold = pygame.image.load('Assets/equipped.png')
+equippedimg = pygame.transform.scale(equippedold, (160, 120))
+equipold = pygame.image.load('Assets/equip.png')
+equipimg = pygame.transform.scale(equipold, (160, 120))
+
 BLUE = 0,0,255
 #Json Save File
 defult_data = {
@@ -60,6 +69,14 @@ def movesave():
     save(defult_data)
     pygame.quit()
     sys.exit()
+#shop
+equip1 = {
+    'x': 90,
+    'y': 375,
+    'width': 160,
+    'height': 45
+}
+#home
 startbutton = {
     'x': 180,
     'y': 350,
@@ -110,15 +127,12 @@ homebutton = {
     'height': 300
 }
 #Pillar
-pillarold = pygame.image.load('Assets/pillar.png') 
+pillarold = pygame.image.load(pillardetails)
 pillar = pygame.transform.scale(pillarold, (400, 600))
 pillarflip = pygame.transform.rotate(pillar, 180)
 #bird
-birdold = pygame.image.load('Assets/bird.png')
+birdold = pygame.image.load(birddetails)
 birdimg = pygame.transform.scale(birdold, (120, 80))
-#birdwidth 1536
-#birdheight 1024
-#3:2 ratio
 #Game Vars and Functions
 gamecolor = 230, 115, 0
 highscore = {
@@ -151,25 +165,20 @@ def pillarxlistmaker():
 pillarxlistmaker()
 class pillarobj:
     def __init__(self):
-        self.pillarylist = []
-        self.xposlist = []
-        self.xposlist.append(pillarx[0])
-        self.xposlist.append(pillarx[1])
-        self.xposlist.append(pillarx[2])
-        self.pillarylist.append(first_pillary)
-        self.pillarylist.append(second_pillary)
-        self.pillarylist.append(third_pillary)
-        self.img  = pillar
-        self.imgflip = pillarflip
-        self.pillar1 = display.blit(self.img, (self.xposlist[0], self.pillarylist[0]))
-        self.pillar1flip = display.blit(self.imgflip, (self.xposlist[0], self.pillarylist[0] + 850))
-        self.pillar2 = display.blit(self.img, (self.xposlist[1], self.pillarylist[1]))
-        self.pillar2flip = display.blit(self.imgflip, (self.xposlist[1], self.pillarylist[1] + 850))
-        self.pillar3 = display.blit(self.img, (self.xposlist[2], self.pillarylist[2]))
-        self.pillar3flip = display.blit(self.imgflip, (self.xposlist[2], self.pillarylist[2] + 850))
+        print('hi')
+    def draw(self):
+        self.pillar1 = display.blit(pillar, (pillar1x, first_pillary))
+        self.pillar1flip = display.blit(pillarflip, (pillar1x, first_pillary + 850))
+        self.pillar2 = display.blit(pillar, (pillar2x, second_pillary))
+        self.pillar2flip = display.blit(pillarflip, (pillar2x, second_pillary + 850))
+        self.pillar3 = display.blit(pillar, (pillar3x, third_pillary))
+        self.pillar3flip = display.blit(pillarflip, (pillar3x, third_pillary + 850))
+
+            
         
+pillarload = pillarobj()
 highscore['highscore'] = str(game_data['highscore'])
-    
+equip1img = equipimg
 #gets width     of the backround image 
 backround_width = backround.get_width()
 #sets the backround x position
@@ -191,6 +200,7 @@ print(highscore['highscore'])
 #Run Loop
 running = True
 while running:
+    #print(clock.get_fps())
     highscorex = 110
     if scrollspeed == 1:
         mode = 'Mode: Easy'
@@ -206,10 +216,20 @@ while running:
         modex = 145
     mousepos = pygame.mouse.get_pos()
     if gamestatus == 0:
+        #backround dont move
         display.blit(shopimg, (-25, -20))
+        display.blit(equip1img, (90, 340))
+        equip1_rect = pygame.Rect((equip1['x'], equip1['y']), (equip1['width'], equip1['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 movesave()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if equip1_rect.collidepoint(mousepos):
+                    if equip1img == equipimg:
+                        equip1img = equippedimg
+                    else:
+                        equip1img = equipimg
+                print('click')
     if gamestatus == 1:
         if highscore['highscore'] == '':
             highscore['highscore'] = '0'
@@ -371,10 +391,7 @@ while running:
         #idk how i didnt think of this in the 3 days i spent on this problem
         display.blit(backround, (backroundx + backround_width, 0))
         display.blit(birdimg, (birdx, birdy))
-        pillarload = pillarobj()
-        pillarload.pillar1
-        pillarload.pillar2
-        pillarload.pillar3
+        pillarload.draw()
         if testpillar == True:
             print(pillarload.xposlist, pillarx[0], pillarx[1], pillarx[2])
         #fontimage
