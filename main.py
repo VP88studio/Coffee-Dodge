@@ -7,6 +7,8 @@ testpillar = False
 testpress = False
 testscore = False
 tesths = False
+testfps = False
+testpillary = True
 #DISPLAY
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 1000
@@ -146,9 +148,6 @@ birdx = 290
 bird_mask = pygame.mask.from_surface(birdimg)
 pillar_mask = pygame.mask.from_surface(pillar)
 pillarflip_mask = pygame.mask.from_surface(pillarflip)
-first_pillary = random.randint(-280, -70)
-second_pillary = random.randint(-280, -70)
-third_pillary = random.randint(-280, -70)
 keys = pygame.key.get_pressed()
 birdy = 460
 pillarx = []
@@ -173,9 +172,7 @@ class pillarobj:
         self.pillar2flip = display.blit(pillarflip, (pillar2x, second_pillary + 850))
         self.pillar3 = display.blit(pillar, (pillar3x, third_pillary))
         self.pillar3flip = display.blit(pillarflip, (pillar3x, third_pillary + 850))
-
-            
-        
+pillaryplus = 40    
 pillarload = pillarobj()
 highscore['highscore'] = str(game_data['highscore'])
 equip1img = equipimg
@@ -185,6 +182,19 @@ backround_width = backround.get_width()
 backroundx = 0
 #sets the speed that it scrolls can be used to make harder gamemodes
 scrollspeed = 2
+first_pillary = random.randint(-280, -70)
+second_pillary = random.randint(-280, -70)
+third_pillary = random.randint(-280, -70)
+def rollpillary():
+    global first_pillary, second_pillary, third_pillary
+    if scrollspeed == 4:
+        first_pillary = random.randint(-280, -70)
+        second_pillary = random.randint(first_pillary - pillaryplus, first_pillary + pillaryplus)
+        third_pillary = random.randint(second_pillary - pillaryplus, second_pillary + pillaryplus)
+    else:
+        first_pillary = random.randint(-280, -70)
+        second_pillary = random.randint(-280, -70)
+        third_pillary = random.randint(-280, -70)
 if game_data['mode'] == 'easy':
     scrollspeed = 1
 if game_data['mode'] == 'normal':
@@ -195,12 +205,30 @@ pillary = -280
 bird_hightspeed = 0
 save(defult_data)
 print(highscore['highscore'])
+birdimganimation = birdimg
+def deathanimation():
+    global birdimganimation, birdy
+    try:
+        deathscroll = scrollspeed
+    except UnboundLocalError:
+        deathscroll = 2
+    scrollspeed = 0
+    birdimganimation = pygame.transform.rotate(birdimg, 180)
+    birdy -= 100
+    pygame.display.flip()
+    time.sleep(3)
+    print(birdy)
+    if birdy == 1000:
+        scrollspeed = deathscroll
+        birdimganimation = birdimg
+
 #-70
 #-280
 #Run Loop
 running = True
 while running:
-    #print(clock.get_fps())
+    if testfps:
+        print(clock.get_fps())
     highscorex = 110
     if scrollspeed == 1:
         mode = 'Mode: Easy'
@@ -294,6 +322,7 @@ while running:
             pillar1x = 600
             pillar2x = 900
             pillar3x = 1200
+            rollpillary()
             print(highscore['highscore'])
             resetgame = False
         keys = pygame.key.get_pressed()
@@ -330,12 +359,24 @@ while running:
         pillar3x -= scrollspeed
         if pillar1x == -260:
             pillar1x = 600
+            if scrollspeed == 4:    
+                first_pillary = random.randint(third_pillary - pillaryplus, third_pillary + pillaryplus)
+                if testpillary:
+                    print(first_pillary)
             first_pillary = random.randint(-280, -70)
         if pillar2x == -260:
             pillar2x = 600
+            if scrollspeed == 4:
+                second_pillary = random.randint(first_pillary - pillaryplus, first_pillary + pillaryplus)
+                if testpillary:
+                    print(second_pillary)
             second_pillary = random.randint(-280, -70)
         if pillar3x == -260:
             pillar3x = 600
+            if scrollspeed == 4:
+                third_pillary = random.randint(second_pillary - pillaryplus, second_pillary + pillaryplus)
+                if testpillary:
+                    print(third_pillary)
             third_pillary = random.randint(-280, 70)
         #collison detection
         pillar1_offsetx = (pillar1x - birdx)
@@ -372,11 +413,13 @@ while running:
         #player die actions
         if bird_mask.overlap(pillar_mask, pillar1_offset) or bird_mask.overlap(pillar_mask, pillar2_offset) or bird_mask.overlap(pillar_mask, pillar3_offset):
             game_data['coffeebeans'] = int(game_data['coffeebeans']) + score
+            deathanimation()
             if testpillar:
                 print("top pillar touched")
             gamestatus = 2
         if bird_mask.overlap(pillarflip_mask, pillarflip1_offset) or bird_mask.overlap(pillarflip_mask, pillarflip2_offset) or bird_mask.overlap(pillarflip_mask, pillarflip3_offset):
             game_data['coffeebeans'] = int(game_data['coffeebeans']) + score
+            deathanimation()
             if testpillar:
                 print("bottom pillar touched")
             gamestatus = 2
@@ -390,7 +433,7 @@ while running:
         #this displays the second image by making the x position backroundx + the width of the first backround
         #idk how i didnt think of this in the 3 days i spent on this problem
         display.blit(backround, (backroundx + backround_width, 0))
-        display.blit(birdimg, (birdx, birdy))
+        display.blit(birdimganimation, (birdx, birdy))
         pillarload.draw()
         if testpillar == True:
             print(pillarload.xposlist, pillarx[0], pillarx[1], pillarx[2])
