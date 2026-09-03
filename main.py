@@ -24,12 +24,13 @@ if gamestatus == 4:
     loadingimg = pygame.transform.scale(loadingold, (750, 1000))
     display.blit(loadingimg, (-25,0))
     pygame.display.flip()
-    time.sleep(1.5)
+    time.sleep(0.5)
     gamestatus = 1
 #Font
 font = pygame.font.Font('Assets/font.ttf', 120)
 mode_font = pygame.font.Font('Assets/font.ttf', 70)
 money_font = pygame.font.Font('Assets/font.ttf', 50)
+moneysmall_font = pygame.font.Font('Assets/font.ttf', 25)
 #Backround
 backrounddetails = 'Assets/backround.png'
 birddetails = 'Assets/bird.png'
@@ -54,7 +55,7 @@ milkbirdimg = pygame.transform.scale(milkbirdold, (120, 80))
 milkpillarold = pygame.image.load('Assets/milkpillar.png')
 milkpillarimg = pygame.transform.scale(milkpillarold, (400, 600))
 shopmilkpillarold = pygame.image.load('Assets/milkpillar.png')
-shopmilkpillarimg = pygame.transform.scale(milkpillarold, (100, 150))
+shopmilkpillarimg = pygame.transform.scale(milkpillarold, (70, 120))
 BLUE = 0,0,255
 #Json Save File
 defult_data = {
@@ -106,6 +107,13 @@ equip1 = {
     'width': 160,
     'height': 45
 }
+equip2 = {
+    'x': 90,
+    'y': 590,
+    'width': 160,
+    'height': 45
+}
+
 #home
 startbutton = {
     'x': 180,
@@ -199,6 +207,8 @@ class pillarobj:
         self.pillar3 = display.blit(pillarimgload, (pillar3x, third_pillary))
         self.pillar3flip = display.blit(pillarimgflipload, (pillar3x, third_pillary + 850))
 pillaryplus = 40    
+milkpillarx = 108
+shopspeed = 1
 pillarload = pillarobj()
 highscore['highscore'] = str(game_data['highscore'])
 equip1img = equipimg
@@ -270,26 +280,35 @@ while running:
         #backround dont move
         display.blit(shopimg, (-25, -20))
         display.blit(milkbirdimg, (108, 228))
+        milkpillarx -= shopspeed
+        if milkpillarx == 78:
+            shopspeed = -1
+        if milkpillarx == 188:
+            shopspeed = 1
+        display.blit(shopmilkpillarimg, (milkpillarx, 428))
         if game_data['item1'] == True:
             display.blit(equip1img, (90, 340))
         display.blit(moneyimg, (5, 5))
         money_surface = money_font.render(str(game_data['coffeebeans']), True, gamecolor)
+        item1_surface = moneysmall_font.render('50', True, gamecolor)
         display.blit(money_surface, (75, 2))
+        display.blit(item1_surface, (155, 338))
         shophome_rect = pygame.Rect((shophome['x'], shophome['y']), (shophome['width'], shophome['height']))
         equip1_rect = pygame.Rect((equip1['x'], equip1['y']), (equip1['width'], equip1['height']))
+        equip2_rect = pygame.Rect((equip2['x'], equip2['y']), (equip2['width'], equip2['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 movesave()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
-                    game_data['coffeebeans'] = int(game_data['coffeebeans']) + 9999999999999
+                    game_data['coffeebeans'] = int(game_data['coffeebeans']) + 50
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if shophome_rect.collidepoint(mousepos):
                     gamestatus = 1
                 if equip1_rect.collidepoint(mousepos):
                     if game_data['item1'] == False: 
-                        if game_data['coffeebeans'] == 100 or game_data['coffeebeans'] >= 100:
-                            game_data['coffeebeans'] = int(game_data['coffeebeans']) - 100
+                        if game_data['coffeebeans'] == 50 or game_data['coffeebeans'] >= 50:
+                            game_data['coffeebeans'] = int(game_data['coffeebeans']) - 50
                             game_data['item1'] = True
                             item1equipvar = True
                             equip1img = equipimg
@@ -345,7 +364,6 @@ while running:
             highscore['highscore'] = '0'
         if score >= int(highscore['highscore']):
             highscore['highscore'] = str(score)
-            print(highscore['highscore'])
         restart_rect = pygame.Rect((restartbutton['x'], restartbutton['y']), (restartbutton['width'], restartbutton['hight']))
         home_rect = pygame.Rect((homebutton['x'], homebutton['y']), (homebutton['width'], homebutton['height']))
         for event in pygame.event.get():

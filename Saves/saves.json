@@ -1,7 +1,7 @@
 {
-    "highscore": 0,
-    "mode": "Normal",
-    "coffeebeans": 0,
-    "item1": false,
+    "highscore": 20,
+    "mode": "hard",
+    "coffeebeans": 36,
+    "item1": true,
     "item1equipped": false
 }
