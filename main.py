@@ -7,8 +7,10 @@ testpillar = False
 testpress = False
 testscore = False
 tesths = False
+testsave = True
 testfps = False
 testpillary = True
+testbuy = True
 #DISPLAY
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 1000
@@ -18,6 +20,7 @@ clock = pygame.time.Clock()
 #Font
 font = pygame.font.Font('Assets/font.ttf', 120)
 mode_font = pygame.font.Font('Assets/font.ttf', 70)
+money_font = pygame.font.Font('Assets/font.ttf', 50)
 #Backround
 backrounddetails = 'Assets/backround.png'
 birddetails = 'Assets/bird.png'
@@ -35,13 +38,16 @@ equippedold = pygame.image.load('Assets/equipped.png')
 equippedimg = pygame.transform.scale(equippedold, (160, 120))
 equipold = pygame.image.load('Assets/equip.png')
 equipimg = pygame.transform.scale(equipold, (160, 120))
+moneyold = pygame.image.load('Assets/money.png')
+moneyimg = pygame.transform.scale(moneyold, (60, 60))
 
 BLUE = 0,0,255
 #Json Save File
 defult_data = {
     'highscore': 0,
     'mode': 'Normal',
-    'coffeebeans': 0
+    'coffeebeans': 0,
+    'item1': False
 }
 def save(datasave):
     with open('Saves/saves.json', 'w') as file:
@@ -51,19 +57,20 @@ def save(datasave):
 try:
     with open('Saves/saves.json', 'r') as file:
         game_data = json.load(file)
-        if tesths:
+        if testsave:
             print(game_data)
             print('Save Found')
             print(f"FoundData {game_data}")
 except FileNotFoundError:
     game_data = defult_data
-    if tesths:
+    if testsave:
         print('Save Not Found')
         print(f"NotFoundData {game_data}")
 def movesave():
     defult_data['highscore'] = int(highscore['highscore'])
     defult_data['mode'] = modevar
     defult_data['coffeebeans'] = game_data['coffeebeans']
+    defult_data['item1'] = game_data['item1']
     if tesths:
         print(f'HS: {int(highscore['highscore'])}')
         print(f"Big Boy HS: {defult_data['highscore']}")
@@ -206,22 +213,8 @@ bird_hightspeed = 0
 save(defult_data)
 print(highscore['highscore'])
 birdimganimation = birdimg
-def deathanimation():
-    global birdimganimation, birdy
-    try:
-        deathscroll = scrollspeed
-    except UnboundLocalError:
-        deathscroll = 2
-    scrollspeed = 0
-    birdimganimation = pygame.transform.rotate(birdimg, 180)
-    birdy -= 100
-    pygame.display.flip()
-    time.sleep(3)
-    print(birdy)
-    if birdy == 1000:
-        scrollspeed = deathscroll
-        birdimganimation = birdimg
-
+if testbuy:
+    print(game_data['item1'])
 #-70
 #-280
 #Run Loop
@@ -246,17 +239,36 @@ while running:
     if gamestatus == 0:
         #backround dont move
         display.blit(shopimg, (-25, -20))
-        display.blit(equip1img, (90, 340))
+        if game_data['item1'] == True:
+            display.blit(equip1img, (90, 340))
+        display.blit(moneyimg, (5, 5))
+        money_surface = money_font.render(str(game_data['coffeebeans']), True, gamecolor)
+        display.blit(money_surface, (75, 2))
         equip1_rect = pygame.Rect((equip1['x'], equip1['y']), (equip1['width'], equip1['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 movesave()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    game_data['coffeebeans'] = int(game_data['coffeebeans']) + 9999999999999
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if equip1_rect.collidepoint(mousepos):
-                    if equip1img == equipimg:
-                        equip1img = equippedimg
-                    else:
-                        equip1img = equipimg
+                    if game_data['item1'] == False: 
+                        if game_data['coffeebeans'] == 100 or game_data['coffeebeans'] >= 100:
+                            game_data['coffeebeans'] = int(game_data['coffeebeans']) - 100
+                            game_data['item1'] = True
+                            item1equipvar = True
+                            equip1img = equipimg
+                            print(game_data['item1'])
+                    if game_data['item1'] == True:
+                        if item1equipvar:
+                            equipimg = equipimg
+                            item1equipvar = False
+                        else:
+                            if equip1img == equippedimg:
+                                equip1img = equipimg
+                            else:
+                                equip1img = equippedimg
                 print('click')
     if gamestatus == 1:
         if highscore['highscore'] == '':
@@ -413,13 +425,11 @@ while running:
         #player die actions
         if bird_mask.overlap(pillar_mask, pillar1_offset) or bird_mask.overlap(pillar_mask, pillar2_offset) or bird_mask.overlap(pillar_mask, pillar3_offset):
             game_data['coffeebeans'] = int(game_data['coffeebeans']) + score
-            deathanimation()
             if testpillar:
                 print("top pillar touched")
             gamestatus = 2
         if bird_mask.overlap(pillarflip_mask, pillarflip1_offset) or bird_mask.overlap(pillarflip_mask, pillarflip2_offset) or bird_mask.overlap(pillarflip_mask, pillarflip3_offset):
             game_data['coffeebeans'] = int(game_data['coffeebeans']) + score
-            deathanimation()
             if testpillar:
                 print("bottom pillar touched")
             gamestatus = 2
