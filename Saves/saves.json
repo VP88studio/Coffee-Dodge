@@ -2,5 +2,6 @@
     "highscore": 0,
     "mode": "Normal",
     "coffeebeans": 0,
-    "item1": false
+    "item1": false,
+    "item1equipped": false
 }

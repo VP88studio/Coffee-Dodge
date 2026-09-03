@@ -17,6 +17,15 @@ SCREEN_HEIGHT = 1000
 display = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 color = 255, 0, 0
 clock = pygame.time.Clock()
+#loadingscreen
+gamestatus = 4
+if gamestatus == 4:
+    loadingold = pygame.image.load('Assets/loading.png')
+    loadingimg = pygame.transform.scale(loadingold, (750, 1000))
+    display.blit(loadingimg, (-25,0))
+    pygame.display.flip()
+    time.sleep(1.5)
+    gamestatus = 1
 #Font
 font = pygame.font.Font('Assets/font.ttf', 120)
 mode_font = pygame.font.Font('Assets/font.ttf', 70)
@@ -40,14 +49,20 @@ equipold = pygame.image.load('Assets/equip.png')
 equipimg = pygame.transform.scale(equipold, (160, 120))
 moneyold = pygame.image.load('Assets/money.png')
 moneyimg = pygame.transform.scale(moneyold, (60, 60))
-
+milkbirdold = pygame.image.load('Assets/milkbird.png')
+milkbirdimg = pygame.transform.scale(milkbirdold, (120, 80))
+milkpillarold = pygame.image.load('Assets/milkpillar.png')
+milkpillarimg = pygame.transform.scale(milkpillarold, (400, 600))
+shopmilkpillarold = pygame.image.load('Assets/milkpillar.png')
+shopmilkpillarimg = pygame.transform.scale(milkpillarold, (100, 150))
 BLUE = 0,0,255
 #Json Save File
 defult_data = {
     'highscore': 0,
     'mode': 'Normal',
     'coffeebeans': 0,
-    'item1': False
+    'item1': False,
+    'item1equipped': False
 }
 def save(datasave):
     with open('Saves/saves.json', 'w') as file:
@@ -79,6 +94,12 @@ def movesave():
     pygame.quit()
     sys.exit()
 #shop
+shophome = {
+    'x': 255,
+    'y': 870,
+    'width': 190,
+    'height': 70
+}
 equip1 = {
     'x': 90,
     'y': 375,
@@ -170,15 +191,13 @@ def pillarxlistmaker():
     pillarx[2] = pillar3x
 pillarxlistmaker()
 class pillarobj:
-    def __init__(self):
-        print('hi')
     def draw(self):
-        self.pillar1 = display.blit(pillar, (pillar1x, first_pillary))
-        self.pillar1flip = display.blit(pillarflip, (pillar1x, first_pillary + 850))
-        self.pillar2 = display.blit(pillar, (pillar2x, second_pillary))
-        self.pillar2flip = display.blit(pillarflip, (pillar2x, second_pillary + 850))
-        self.pillar3 = display.blit(pillar, (pillar3x, third_pillary))
-        self.pillar3flip = display.blit(pillarflip, (pillar3x, third_pillary + 850))
+        self.pillar1 = display.blit(pillarimgload, (pillar1x, first_pillary))
+        self.pillar1flip = display.blit(pillarimgflipload, (pillar1x, first_pillary + 850))
+        self.pillar2 = display.blit(pillarimgload, (pillar2x, second_pillary))
+        self.pillar2flip = display.blit(pillarimgflipload, (pillar2x, second_pillary + 850))
+        self.pillar3 = display.blit(pillarimgload, (pillar3x, third_pillary))
+        self.pillar3flip = display.blit(pillarimgflipload, (pillar3x, third_pillary + 850))
 pillaryplus = 40    
 pillarload = pillarobj()
 highscore['highscore'] = str(game_data['highscore'])
@@ -212,7 +231,12 @@ pillary = -280
 bird_hightspeed = 0
 save(defult_data)
 print(highscore['highscore'])
-birdimganimation = birdimg
+
+#gameimagesloading
+pillarimgload = pillar
+pillarimgflipload = pillarflip
+birdimgload = birdimg
+
 if testbuy:
     print(game_data['item1'])
 #-70
@@ -223,6 +247,12 @@ while running:
     if testfps:
         print(clock.get_fps())
     highscorex = 110
+    #Equipped Items
+    if game_data['item1equipped']:
+        birdimgload = milkbirdimg
+    if game_data['item1equipped'] == False:
+        birdimgload = birdimg
+    #Modes
     if scrollspeed == 1:
         mode = 'Mode: Easy'
         modevar = 'easy'
@@ -239,11 +269,13 @@ while running:
     if gamestatus == 0:
         #backround dont move
         display.blit(shopimg, (-25, -20))
+        display.blit(milkbirdimg, (108, 228))
         if game_data['item1'] == True:
             display.blit(equip1img, (90, 340))
         display.blit(moneyimg, (5, 5))
         money_surface = money_font.render(str(game_data['coffeebeans']), True, gamecolor)
         display.blit(money_surface, (75, 2))
+        shophome_rect = pygame.Rect((shophome['x'], shophome['y']), (shophome['width'], shophome['height']))
         equip1_rect = pygame.Rect((equip1['x'], equip1['y']), (equip1['width'], equip1['height']))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -252,6 +284,8 @@ while running:
                 if event.key == pygame.K_p:
                     game_data['coffeebeans'] = int(game_data['coffeebeans']) + 9999999999999
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if shophome_rect.collidepoint(mousepos):
+                    gamestatus = 1
                 if equip1_rect.collidepoint(mousepos):
                     if game_data['item1'] == False: 
                         if game_data['coffeebeans'] == 100 or game_data['coffeebeans'] >= 100:
@@ -267,8 +301,10 @@ while running:
                         else:
                             if equip1img == equippedimg:
                                 equip1img = equipimg
+                                game_data['item1equipped'] = False
                             else:
                                 equip1img = equippedimg
+                                game_data['item1equipped'] = True
                 print('click')
     if gamestatus == 1:
         if highscore['highscore'] == '':
@@ -443,7 +479,7 @@ while running:
         #this displays the second image by making the x position backroundx + the width of the first backround
         #idk how i didnt think of this in the 3 days i spent on this problem
         display.blit(backround, (backroundx + backround_width, 0))
-        display.blit(birdimganimation, (birdx, birdy))
+        display.blit(birdimgload, (birdx, birdy))
         pillarload.draw()
         if testpillar == True:
             print(pillarload.xposlist, pillarx[0], pillarx[1], pillarx[2])
